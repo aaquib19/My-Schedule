@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.dagger.hilt)
+    alias(libs.plugins.devtools.ksp)
 }
 
 android {
@@ -56,4 +58,26 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Compose BOM keeps Compose libs in sync
+    implementation(platform(libs.androidx.compose.bom))
+    // Compose UI
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
+
+    // Material 3
+    implementation(libs.androidx.material3)
+
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
+
+    // Core + Activity Compose
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.compose)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
 }

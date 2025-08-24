@@ -26,6 +26,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material3.TopAppBar
+import com.android.myschedule.ui.CreateTaskScreen
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,26 +70,26 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun CreateTaskScreen(onBack: () -> Unit) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Create Task") },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-                        }
-                    }
-                )
-            }
-        ) { innerPadding ->
-            Text(
-                text = "Simple form placeholder",
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
-    }
+//    @OptIn(ExperimentalMaterial3Api::class)
+//    @Composable
+//    fun CreateTaskScreen(onBack: () -> Unit) {
+//        Scaffold(
+//            topBar = {
+//                TopAppBar(
+//                    title = { Text("Create Task") },
+//                    navigationIcon = {
+//                        IconButton(onClick = onBack) {
+//                            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+//                        }
+//                    }
+//                )
+//            }
+//        ) { innerPadding ->
+//            Text(
+//                text = "Simple form placeholder",
+//                modifier = Modifier.padding(innerPadding)
+//            )
+//        }
+//    }
 
 }

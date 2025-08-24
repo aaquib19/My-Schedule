@@ -26,4 +26,17 @@ class TaskViewModel @Inject constructor(
             taskDao.insert(Task(title = title, notes =  notes?.trim()))
         }
     }
+
+    fun setDone(id: Int, isDone : Boolean){
+        viewModelScope.launch {
+            taskDao.setDone(id, isDone)
+        }
+    }
+
+    fun undoDone(id : Int)
+    {
+        viewModelScope.launch {
+            taskDao.setDone(id, false)
+        }
+    }
 }

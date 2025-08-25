@@ -10,9 +10,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -26,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextDecoration
@@ -35,16 +40,23 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import com.android.myschedule.data.Task
 import com.android.myschedule.ui.TaskViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen (onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) {
     val tasks by vm.tasks.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     Scaffold (
         topBar = { TopAppBar(title = { Text(text = "My Schedule") }) },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddClicked) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
+        }
     ){
         inner ->
         if(tasks.isEmpty()){
@@ -67,7 +79,7 @@ fun HomeScreen (onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) 
                             vm.setDone(task.id, checked)
                             if (checked) {
                                 // show UNDO when marking complete
-                                LaunchedEffect(task.id) {
+                                scope.launch  {
                                     val res = snackbarHostState.showSnackbar(
                                         message = "Task completed",
                                         actionLabel = "UNDO",
@@ -92,7 +104,7 @@ fun HomeScreen (onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) 
 @Composable
 private fun TaskRow(
     task: Task,
-    onCheckedChange: @Composable (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit
 ) {
     ElevatedCard {
         Row(

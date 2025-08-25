@@ -48,11 +48,6 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             Scaffold (
                 topBar = { TopAppBar(title = {Text("My Schedule")}) },
-                floatingActionButton = {
-                    FloatingActionButton(onClick = {navController.navigate("create")}) {
-                        Icon(Icons.Default.Add, contentDescription = "Add")
-                    }
-                }
             ){ innerPadding ->
                 AppNavHost(navController, Modifier.padding(innerPadding))
             }
@@ -62,7 +57,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
         NavHost(navController = navController, startDestination = "home", modifier = modifier){
-            composable("home"){HomeScreen(onAddClicked = {navController.navigate("create")})}
+            composable("home"){HomeScreen(onAddClicked = {navController.navigate("create"){launchSingleTop = true} })}
             composable("create"){CreateTaskScreen(onBack = {navController.popBackStack()})}
         }
 

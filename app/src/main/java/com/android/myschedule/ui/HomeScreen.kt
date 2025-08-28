@@ -37,15 +37,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.myschedule.data.Task
-import com.android.myschedule.ui.TaskViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen (onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) {
-    val tasks by vm.tasks.collectAsState()
+    val tasks by vm.tasks.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -54,7 +53,7 @@ fun HomeScreen (onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) 
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddClicked) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
+                Icon(Icons.Filled.Add, contentDescription = "Add")
             }
         }
     ){
@@ -73,9 +72,8 @@ fun HomeScreen (onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) 
                 ){
                 items(tasks, key = {it.id}){
                     task ->
-                    TaskRow(
-                        task = task,
-                        onCheckedChange = { checked ->
+                    val onChecked = remember(task.id) {
+                        { checked: Boolean  ->
                             vm.setDone(task.id, checked)
                             if (checked) {
                                 // show UNDO when marking complete
@@ -92,6 +90,10 @@ fun HomeScreen (onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) 
                                 }
                             }
                         }
+                    }
+                    TaskRow(
+                        task = task,
+                        onCheckedChange = onChecked
                     )
                 }
             }
@@ -115,7 +117,7 @@ private fun TaskRow(
         ) {
             Checkbox(
                 checked = task.isDone,
-                onCheckedChange = onCheckedChange as ((Boolean) -> Unit)?
+                onCheckedChange = onCheckedChange
             )
             Column(modifier = Modifier.weight(1f)) {
                 val alpha = if (task.isDone) 0.6f else 1f

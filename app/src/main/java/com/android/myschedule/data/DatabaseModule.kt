@@ -15,7 +15,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase = Room.databaseBuilder(context,
-        AppDatabase::class.java, "myschedule.db").build()
+        AppDatabase::class.java, "myschedule.db")
+        .addMigrations(AppDatabase.MIGRATION_1_2)
+        .build()
 
     @Provides
     fun providesTaskDao(db: AppDatabase): TaskDao = db.taskDao()

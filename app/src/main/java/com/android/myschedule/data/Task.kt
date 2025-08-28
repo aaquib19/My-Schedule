@@ -1,9 +1,10 @@
 package com.android.myschedule.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "tasks")
+@Entity(tableName = "tasks", indices = [Index("createdAt")])
 data class Task (
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title : String,

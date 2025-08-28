@@ -1,7 +1,13 @@
 package com.android.myschedule.ui
 
-class EditTaskScreen (
+import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
+
+@Composable
+fun EditTaskScreen (
     taskId: Int,
-    onBack : () -> Unit
+    onBack : () -> Unit,
+    vm : TaskViewModel  = hiltViewModel()
 ){
+
 }

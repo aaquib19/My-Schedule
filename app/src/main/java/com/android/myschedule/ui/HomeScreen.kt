@@ -113,7 +113,7 @@ private fun TaskRow(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ElevatedCard {
+    ElevatedCard(modifier = modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

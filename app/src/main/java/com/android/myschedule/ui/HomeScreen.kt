@@ -1,5 +1,6 @@
 package com.android.myschedule.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,7 +44,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) {
+fun HomeScreen(
+    onAddClicked: () -> Unit,
+    onEditTask : (Int)->Unit,
+    vm : TaskViewModel = hiltViewModel()) {
     val tasks by vm.tasks.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -92,7 +96,8 @@ fun HomeScreen(onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) {
                     }
                     TaskRow(
                         task = task,
-                        onCheckedChange = onChecked
+                        onCheckedChange = onChecked,
+                        modifier = Modifier.clickable{onEditTask(task.id)}
                     )
                 }
             }
@@ -105,7 +110,8 @@ fun HomeScreen(onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) {
 @Composable
 private fun TaskRow(
     task: Task,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     ElevatedCard {
         Row(

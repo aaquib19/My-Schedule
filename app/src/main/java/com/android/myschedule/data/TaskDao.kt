@@ -12,6 +12,10 @@ interface TaskDao {
     @Insert
     suspend fun insert(task: Task)
 
+
+    @Query("SELECT * FROM tasks WHERE id = :id LIMIT 1")
+    fun observeTask(id : Int) : Flow<Task>
+
     @Update
     suspend fun update(task: Task)
 

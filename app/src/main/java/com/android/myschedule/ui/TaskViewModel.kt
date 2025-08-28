@@ -1,6 +1,7 @@
 package com.android.myschedule.ui
 
 import android.app.assist.AssistStructure
+import androidx.compose.runtime.Updater
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.myschedule.data.TaskDao
@@ -38,5 +39,11 @@ class TaskViewModel @Inject constructor(
         viewModelScope.launch {
             taskDao.setDone(id, false)
         }
+    }
+
+    fun observerTask(id : Int) = taskDao.observeTask(id)
+
+    fun updateTask(updated : Task){
+        viewModelScope.launch { taskDao.update(updated) }
     }
 }

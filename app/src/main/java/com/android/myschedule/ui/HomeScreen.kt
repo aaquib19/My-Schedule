@@ -43,13 +43,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen (onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) {
+fun HomeScreen(onAddClicked: () -> Unit, vm : TaskViewModel = hiltViewModel()) {
     val tasks by vm.tasks.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     Scaffold (
-        topBar = { TopAppBar(title = { Text(text = "My Schedule") }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddClicked) {

@@ -84,6 +84,7 @@ fun CreateTaskScreen(onBack : ()-> Unit, vm: TaskViewModel = hiltViewModel()){
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ){
             OutlinedTextField(
+
                 value = title,
                 onValueChange = {
                     title = it
@@ -93,7 +94,8 @@ fun CreateTaskScreen(onBack : ()-> Unit, vm: TaskViewModel = hiltViewModel()){
                 singleLine = true,
                 isError =  showTitleError,
                 supportingText = {if(showTitleError) Text("Title is required")},
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
@@ -101,6 +103,7 @@ fun CreateTaskScreen(onBack : ()-> Unit, vm: TaskViewModel = hiltViewModel()){
                     notes = it
                 }, label = {Text("Notes (optional)")},
                 minLines = 3,
+                modifier = Modifier.fillMaxWidth(),
                 isError =  showTitleError,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = {

@@ -1,5 +1,7 @@
 package com.android.myschedule.ui
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,6 +56,7 @@ fun HomeScreen(
     val tasks by vm.tasks.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Scaffold (
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -98,7 +102,7 @@ fun HomeScreen(
                     }
                     val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
                         confirmValueChange = {
-                            if (it == SwipeToDismissBoxValue.StartToEnd) onToggleDone(task, vm, scope, snackbarHostState)
+                            if (it == SwipeToDismissBoxValue.StartToEnd) onToggleDone(task, vm, scope, context)
                             else if (it == SwipeToDismissBoxValue.EndToStart) onRemove(task, vm, scope, snackbarHostState)
                             // Reset item when toggling done status
                             it != SwipeToDismissBoxValue.StartToEnd
@@ -168,10 +172,12 @@ fun onToggleDone(
     task: Task,
     vm: TaskViewModel,
     scope: CoroutineScope,
-    snackbarHostState: SnackbarHostState
+    context: Context
 )
 {
-
+    Toast.makeText(context
+        , "hello world",
+        Toast.LENGTH_SHORT).show()
 }
 
 fun onRemove(

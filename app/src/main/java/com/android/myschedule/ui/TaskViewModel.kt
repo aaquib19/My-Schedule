@@ -46,4 +46,12 @@ class TaskViewModel @Inject constructor(
     fun updateTask(updated : Task){
         viewModelScope.launch { taskDao.update(updated) }
     }
+
+    fun deleteTask(task : Task){
+        viewModelScope.launch { taskDao.deleteById(task.id)}
+    }
+
+    fun undoDelete(task : Task){
+        viewModelScope.launch { taskDao.insert(task) }
+    }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,11 +25,11 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.myschedule.data.Task
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,11 +96,27 @@ fun HomeScreen(
                             }
                         }
                     }
-                    TaskRow(
+                    val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = {
+                            if (it == SwipeToDismissBoxValue.StartToEnd) onToggleDone(task, vm, scope, snackbarHostState)
+                            else if (it == SwipeToDismissBoxValue.EndToStart) onRemove(task, vm, scope, snackbarHostState)
+                            // Reset item when toggling done status
+                            it != SwipeToDismissBoxValue.StartToEnd
+                        }
+                    )
+                    SwipeToDismissBox(
+                        state = swipeToDismissBoxState,
+                        enableDismissFromStartToEnd = true,
+                        backgroundContent = {Row (modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.End){ Icon(Icons.Filled.Delete, contentDescription = "Delete") }
+
+                        }
+                    ) {
+                        TaskRow(
                         task = task,
                         onCheckedChange = onChecked,
                         modifier = Modifier.clickable{onEditTask(task.id)}
                     )
+                    }
                 }
             }
         }
@@ -144,4 +162,36 @@ private fun TaskRow(
             }
         }
     }
+}
+
+fun onToggleDone(
+    task: Task,
+    vm: TaskViewModel,
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState
+)
+{
+
+}
+
+fun onRemove(
+    task: Task,
+    vm: TaskViewModel,
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState
+)
+{
+    vm.deleteTask(task)
+    scope.launch {
+        val res = snackbarHostState.showSnackbar(
+            message = "Task Deleted",
+            actionLabel = "UNDO",
+            withDismissAction = true,
+            duration = SnackbarDuration.Short
+        )
+        if(res == SnackbarResult.ActionPerformed){
+            vm.undoDelete(task)
+        }
+    }
+
 }

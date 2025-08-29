@@ -3,13 +3,14 @@ package com.android.myschedule.data
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(task: Task)
 
 
@@ -31,5 +32,7 @@ interface TaskDao {
     @Query("DELETE FROM tasks")
     suspend fun deleteAll()
 
+    @Query("DELETE FROM tasks Where id = :id")
+    suspend fun deleteById(id: Int)
 
 }

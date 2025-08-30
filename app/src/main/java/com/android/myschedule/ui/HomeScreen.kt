@@ -1,15 +1,12 @@
 package com.android.myschedule.ui
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -37,16 +34,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.myschedule.data.Task
 import kotlinx.coroutines.CoroutineScope
@@ -56,154 +50,306 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     onAddClicked: () -> Unit,
-    onEditTask : (Int)->Unit,
-//    onShowCalendar : ()->Unit,
-    vm : TaskViewModel = hiltViewModel()) {
-    val tasks by vm.tasks.collectAsStateWithLifecycle()
+    onEditTask: (Int) -> Unit,
+    viewModel: TaskViewModel = hiltViewModel()
+) {
+    val tasks by viewModel.tasks.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
-    Scaffold (
+    Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddClicked) {
-                Icon(Icons.Filled.Add, contentDescription = "Add")
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Add Task"
+                )
             }
         }
-    ){
-        inner ->
-        if(tasks.isEmpty()){
-            Text("No tasks yet. Tap + to add one.",
+    ) { paddingValues ->
+        TaskContent(
+            tasks = tasks,
+            onEditTask = onEditTask,
+            viewModel = viewModel,
+            snackbarHostState = snackbarHostState,
+            scope = scope,
+            modifier = Modifier.padding(paddingValues)
+        )
+    }
+}
+
+@Composable
+private fun TaskContent(
+    tasks: List<Task>,
+    onEditTask: (Int) -> Unit,
+    viewModel: TaskViewModel,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope,
+    modifier: Modifier = Modifier
+) {
+    if (tasks.isEmpty()) {
+        EmptyTasksState(modifier = modifier)
+    } else {
+        TaskList(
+            tasks = tasks,
+            onEditTask = onEditTask,
+            viewModel = viewModel,
+            snackbarHostState = snackbarHostState,
+            scope = scope,
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+private fun EmptyTasksState(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "No tasks yet",
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Tap the + button to add your first task",
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(inner).padding(16.dp)
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun TaskList(
+    tasks: List<Task>,
+    onEditTask: (Int) -> Unit,
+    viewModel: TaskViewModel,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            items = tasks,
+            key = { it.id }
+        ) { task ->
+            SwipeableTaskItem(
+                task = task,
+                onEditTask = onEditTask,
+                viewModel = viewModel,
+                snackbarHostState = snackbarHostState,
+                scope = scope
             )
         }
-        else
-        {
-            LazyColumn (modifier = Modifier.padding(inner),
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-                ){
-                items(tasks, key = {it.id}){
-                    task ->
-                    val onChecked = remember(task.id) {
-                        { checked: Boolean  ->
-                            vm.setDone(task.id, checked)
-                            if (checked) {
-                                // show UNDO when marking complete
-                                scope.launch  {
-                                    val res = snackbarHostState.showSnackbar(
-                                        message = "Task completed",
-                                        actionLabel = "UNDO",
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Short
-                                    )
-                                    if (res == SnackbarResult.ActionPerformed) {
-                                        vm.undoDone(task.id)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
-                        confirmValueChange = {
-                            if (it == SwipeToDismissBoxValue.StartToEnd) onToggleDone(task, vm, scope, context)
-                            else if (it == SwipeToDismissBoxValue.EndToStart) onRemove(task, vm, scope, snackbarHostState)
-                            // Reset item when toggling done status
-                            it != SwipeToDismissBoxValue.StartToEnd
-                        }
-                    )
-                    SwipeToDismissBox(
-                        state = swipeToDismissBoxState,
-                        enableDismissFromStartToEnd = true,
-                        backgroundContent = {Row (modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.End){ Icon(Icons.Filled.Delete, contentDescription = "Delete") }
+    }
+}
 
-                        }
-                    ) {
-                        TaskRow(
-                        task = task,
-                        onCheckedChange = onChecked,
-                        modifier = Modifier.clickable{onEditTask(task.id)}
-                    )
-                    }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeableTaskItem(
+    task: Task,
+    onEditTask: (Int) -> Unit,
+    viewModel: TaskViewModel,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope
+) {
+    val swipeState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { dismissValue ->
+            when (dismissValue) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    handleTaskToggle(task, viewModel, scope, snackbarHostState)
+                    false // Reset the swipe state
                 }
+                SwipeToDismissBoxValue.EndToStart -> {
+                    handleTaskDeletion(task, viewModel, scope, snackbarHostState)
+                    true // Allow dismissal
+                }
+                SwipeToDismissBoxValue.Settled -> false
             }
         }
+    )
 
-
+    SwipeToDismissBox(
+        state = swipeState,
+        enableDismissFromStartToEnd = true,
+        enableDismissFromEndToStart = true,
+        backgroundContent = {
+            SwipeBackground(dismissValue = swipeState.dismissDirection)
+        }
+    ) {
+        TaskRow(
+            task = task,
+            onCheckedChange = { isChecked ->
+                handleTaskToggle(task, viewModel, scope, snackbarHostState, isChecked)
+            },
+            onClick = { onEditTask(task.id) }
+        )
     }
-
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeBackground(
+    dismissValue: SwipeToDismissBoxValue
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = when (dismissValue) {
+            SwipeToDismissBoxValue.StartToEnd -> Arrangement.Start
+            SwipeToDismissBoxValue.EndToStart -> Arrangement.End
+            else -> Arrangement.End
+        }
+    ) {
+        Icon(
+            imageVector = when (dismissValue) {
+                SwipeToDismissBoxValue.StartToEnd -> Icons.Filled.Add // Or use a check icon
+                else -> Icons.Filled.Delete
+            },
+            contentDescription = when (dismissValue) {
+                SwipeToDismissBoxValue.StartToEnd -> "Toggle Complete"
+                else -> "Delete"
+            },
+            tint = when (dismissValue) {
+                SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.primary
+                else -> MaterialTheme.colorScheme.error
+            }
+        )
+    }
+}
+
 @Composable
 private fun TaskRow(
     task: Task,
     onCheckedChange: (Boolean) -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ElevatedCard(modifier = modifier) {
+    ElevatedCard(
+        modifier = modifier.clickable { onClick() }
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
                 checked = task.isDone,
                 onCheckedChange = onCheckedChange
             )
-            Column(modifier = Modifier.weight(1f)) {
-                val alpha = if (task.isDone) 0.6f else 1f
-                val deco = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None
-                Text(
-                    task.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.alpha(alpha),
-                    textDecoration = deco
-                )
-                if (!task.notes.isNullOrBlank()) {
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        task.notes,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.alpha(alpha)
-                    )
-                }
-            }
+
+            TaskContent(
+                task = task,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
 
-fun onToggleDone(
+@Composable
+private fun TaskContent(
     task: Task,
-    vm: TaskViewModel,
-    scope: CoroutineScope,
-    context: Context
-)
-{
-    Toast.makeText(context
-        , "hello world",
-        Toast.LENGTH_SHORT).show()
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        val alpha = if (task.isDone) 0.6f else 1f
+        val textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None
+
+        Text(
+            text = task.title,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.alpha(alpha),
+            textDecoration = textDecoration
+        )
+
+        if (!task.notes.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = task.notes,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.alpha(alpha),
+                textDecoration = textDecoration
+            )
+        }
+    }
 }
 
-fun onRemove(
+// Business logic functions
+private fun handleTaskToggle(
     task: Task,
-    vm: TaskViewModel,
+    viewModel: TaskViewModel,
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState,
+    isChecked: Boolean? = null
+) {
+    val newStatus = isChecked ?: !task.isDone
+    viewModel.setDone(task.id, newStatus)
+
+    if (newStatus) {
+        showCompletionSnackbar(task, viewModel, scope, snackbarHostState)
+    }
+}
+
+private fun handleTaskDeletion(
+    task: Task,
+    viewModel: TaskViewModel,
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState
-)
-{
-    vm.deleteTask(task)
+) {
+    viewModel.deleteTask(task)
+    showDeletionSnackbar(task, viewModel, scope, snackbarHostState)
+}
+
+private fun showCompletionSnackbar(
+    task: Task,
+    viewModel: TaskViewModel,
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState
+) {
     scope.launch {
-        val res = snackbarHostState.showSnackbar(
-            message = "Task Deleted",
+        val result = snackbarHostState.showSnackbar(
+            message = "Task completed",
             actionLabel = "UNDO",
             withDismissAction = true,
             duration = SnackbarDuration.Short
         )
-        if(res == SnackbarResult.ActionPerformed){
-            vm.undoDelete(task)
+        if (result == SnackbarResult.ActionPerformed) {
+            viewModel.undoDone(task.id)
         }
     }
+}
 
+private fun showDeletionSnackbar(
+    task: Task,
+    viewModel: TaskViewModel,
+    scope: CoroutineScope,
+    snackbarHostState: SnackbarHostState
+) {
+    scope.launch {
+        val result = snackbarHostState.showSnackbar(
+            message = "Task deleted",
+            actionLabel = "UNDO",
+            withDismissAction = true,
+            duration = SnackbarDuration.Short
+        )
+        if (result == SnackbarResult.ActionPerformed) {
+            viewModel.undoDelete(task)
+        }
+    }
 }

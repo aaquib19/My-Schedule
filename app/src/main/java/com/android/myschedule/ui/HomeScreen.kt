@@ -3,6 +3,8 @@ package com.android.myschedule.ui
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,7 +39,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -52,6 +57,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     onAddClicked: () -> Unit,
     onEditTask : (Int)->Unit,
+//    onShowCalendar : ()->Unit,
     vm : TaskViewModel = hiltViewModel()) {
     val tasks by vm.tasks.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

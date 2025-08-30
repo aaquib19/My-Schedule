@@ -29,6 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.android.myschedule.ui.CreateTaskScreen
+import com.android.myschedule.ui.HomePager
 import com.android.myschedule.ui.HomeScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -59,8 +60,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun AppNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
         NavHost(navController = navController, startDestination = "home", modifier = modifier){
-            composable("home"){HomeScreen(onAddClicked = {navController.navigate("create"){launchSingleTop = true} },
-                onEditTask = {id -> navController.navigate("edit/${id}")})}
+            composable("home"){ HomePager(navController) }
             composable("create"){CreateTaskScreen(onBack = {navController.popBackStack()})}
             composable("edit/{id}",
                 arguments = listOf(navArgument("id"){type = NavType.IntType})){

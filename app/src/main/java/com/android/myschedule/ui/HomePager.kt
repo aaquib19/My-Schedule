@@ -20,7 +20,7 @@ fun HomePager(navController: NavController) {
 
 
     HorizontalPager(state = pagerState,
-        modifier = Modifier.fillMaxSize(),
+//        modifier = Modifier.fillMaxSize(),
     ) {
         page ->
         when(page){

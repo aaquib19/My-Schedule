@@ -83,19 +83,20 @@ fun HomeScreen(
         ) {
             DaySwitcherHeader(
                 date = currentDate,
-                onPrevious = {currentDate = currentDate.minusDays(1)},
-                onNext = { currentDate = currentDate.plusDays(1)},
+                onPrevious = { currentDate = currentDate.minusDays(1) },
+                onNext = { currentDate = currentDate.plusDays(1) },
                 formatter = formatter
             )
+
+            TaskContent(
+                tasks = tasks,
+                onEditTask = onEditTask,
+                viewModel = viewModel,
+                snackbarHostState = snackbarHostState,
+                scope = scope,
+                modifier = Modifier.padding(paddingValues)
+            )
         }
-        TaskContent(
-            tasks = tasks,
-            onEditTask = onEditTask,
-            viewModel = viewModel,
-            snackbarHostState = snackbarHostState,
-            scope = scope,
-            modifier = Modifier.padding(paddingValues)
-        )
     }
 }
 

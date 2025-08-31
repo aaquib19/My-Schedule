@@ -41,4 +41,7 @@ interface TaskDao {
 
     @Query("SELECT * FROM tasks where epochDay BETWEEN :startDate AND :endDate ORDER BY id DESC")
     fun getTaskForRange(startDate : Long, endDate : Long) : Flow<List<Task>>
+
+    @Query("SELECT COUNT(*) FROM tasks where epochDay = :epochDay ")
+    fun getTaskCountForDay(epochDay: Long):  kotlinx.coroutines.flow.Flow<Int>
 }

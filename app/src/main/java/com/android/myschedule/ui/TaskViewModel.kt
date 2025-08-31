@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.stateIn
 import androidx.lifecycle.viewModelScope
 import com.android.myschedule.data.Task
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,5 +65,9 @@ class TaskViewModel @Inject constructor(
 
     fun undoDelete(task : Task){
         viewModelScope.launch { taskDao.insert(task) }
+    }
+
+    fun getTasksCountForDay(epochDay: Long): kotlinx.coroutines.flow.Flow<Int> {
+        return taskDao.getTaskCountForDay(epochDay)
     }
 }

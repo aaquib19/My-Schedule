@@ -51,13 +51,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.myschedule.ui.TaskViewModel
+import kotlinx.coroutines.flow.toList
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun CalendarScreen() {
+fun CalendarScreen(vm: TaskViewModel = hiltViewModel()) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var currentMonth by remember { mutableStateOf(YearMonth.from(LocalDate.now())) }
 
@@ -105,17 +109,13 @@ fun CalendarScreen() {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                val count by vm
+                    .getTasksCountForDay(selectedDate.toEpochDay())
+                    .collectAsStateWithLifecycle(initialValue = 0)
                 // Enhanced Selected Date Info
                 SelectedDateInfo(
                     selectedDate = selectedDate,
-                    taskCount = when (selectedDate.dayOfMonth % 8) {
-                        0 -> 4
-                        1, 2 -> 2
-                        3 -> 1
-                        4 -> 3
-                        5 -> 1
-                        else -> 0
-                    }
+                    taskCount = count
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -299,19 +299,22 @@ private fun CalendarGrid(
         val date = nextMonth.atDay(day)
         calendarDates.add(CalendarDate(date, false))
     }
-
+    val vm: TaskViewModel = hiltViewModel()
     LazyVerticalGrid(
         columns = GridCells.Fixed(7),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(calendarDates) { calendarDate ->
+            val count by vm
+                .getTasksCountForDay(calendarDate.date.toEpochDay())
+                .collectAsStateWithLifecycle(initialValue = 0)
             EnhancedCalendarDay(
                 date = calendarDate.date,
                 isCurrentMonth = calendarDate.isCurrentMonth,
                 isSelected = calendarDate.date == selectedDate,
                 isToday = calendarDate.date == LocalDate.now(),
-                taskCount = if (calendarDate.isCurrentMonth) tasksForDate(calendarDate.date) else 0,
+                taskCount = count,
                 onClick = { onDateSelected(calendarDate.date) }
             )
         }

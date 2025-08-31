@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 @Dao
 interface TaskDao {
@@ -35,4 +36,9 @@ interface TaskDao {
     @Query("DELETE FROM tasks Where id = :id")
     suspend fun deleteById(id: Int)
 
+    @Query("SELECT * FROM tasks where epochDay = :epochDay ORDER BY id DESC")
+    fun getTaskForDate(epochDay : Long): Flow<List<Task>>
+
+    @Query("SELECT * FROM tasks where epochDay BETWEEN :startDate AND :endDate ORDER BY id DESC")
+    fun getTaskForRange(startDate : Long, endDate : Long) : Flow<List<Task>>
 }

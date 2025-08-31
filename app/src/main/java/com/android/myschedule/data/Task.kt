@@ -10,5 +10,6 @@ data class Task (
     val title : String,
     val notes : String? = null,
     val createdAt : Long = System.currentTimeMillis(),
-    val isDone : Boolean = false
+    val isDone : Boolean = false,
+    val epochDay : Long //LocalDatte.now().tooEpochDay()
 )

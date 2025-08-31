@@ -60,12 +60,14 @@ fun HomeScreen(
     onEditTask: (Int) -> Unit,
     viewModel: TaskViewModel = hiltViewModel()
 ) {
-    val tasks by viewModel.tasks.collectAsStateWithLifecycle()
+//    val tasks by viewModel.tasks.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     val formatter = remember { DateTimeFormatter.ofPattern("EEE, dd MMM") }
-    var currentDate by remember { mutableStateOf(LocalDate.now()) }
+    val epoch by viewModel.selectedDate.collectAsStateWithLifecycle()
+    val currentDate = remember(epoch) { LocalDate.ofEpochDay(epoch) }
+    val tasks by viewModel.tasksForSelectedDate.collectAsStateWithLifecycle()
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -83,8 +85,8 @@ fun HomeScreen(
         ) {
             DaySwitcherHeader(
                 date = currentDate,
-                onPrevious = { currentDate = currentDate.minusDays(1) },
-                onNext = { currentDate = currentDate.plusDays(1) },
+                onPrevious = { viewModel.setSelectedDate(currentDate.minusDays(1)) },
+                onNext = { viewModel.setSelectedDate(currentDate.plusDays(1)) },
                 formatter = formatter
             )
 
@@ -122,7 +124,7 @@ fun DaySwitcherHeader(
             if(date == LocalDate.now()){
                 Text("Today")}
         }
-        IconButton(onClick = onPrevious) {Icon(
+        IconButton(onClick = onNext) {Icon(
             imageVector = Icons.Filled.KeyboardDoubleArrowRight,
             contentDescription = "Next Day"
         ) }

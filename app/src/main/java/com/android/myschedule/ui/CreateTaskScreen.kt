@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +54,7 @@ fun CreateTaskScreen(onBack : ()-> Unit, vm: TaskViewModel = hiltViewModel()){
     fun trySave(){
         showTitleError = title.isBlank()
         if(showTitleError) return
-        vm.saveTask(title.trim(), notes.ifBlank { null }?.trim())
+        vm.saveTask(title.trim(), notes.ifBlank { null }?.trim(), LocalDate.now().toEpochDay())
         title= ""
         notes = ""
         scope.launch {

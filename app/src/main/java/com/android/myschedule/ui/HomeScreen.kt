@@ -58,7 +58,6 @@ fun HomeScreen(
     onEditTask: (Int) -> Unit,
     viewModel: TaskViewModel = hiltViewModel()
 ) {
-//    val tasks by viewModel.tasks.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 

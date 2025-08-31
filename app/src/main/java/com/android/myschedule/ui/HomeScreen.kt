@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowRight
 import androidx.compose.material3.Checkbox
@@ -108,7 +107,11 @@ fun DaySwitcherHeader(
     formatter: DateTimeFormatter,
     modifier: Modifier = Modifier
 ) {
-    Row {
+    Row (
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
         IconButton(onClick = onPrevious) {Icon(
             imageVector = Icons.Filled.KeyboardDoubleArrowLeft,
             contentDescription = "Previous Day"
